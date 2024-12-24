@@ -33,6 +33,7 @@ bak_repo: backup-xxx
 bak_repo_owner: owner
 ```
 执行命令`nohup ./backup2gh > /dev/null 2>&1 &`
+
 2. Dockerfile中使用
 以Uptime Kuma的Dockerfile作为示例
 ```
