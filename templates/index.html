@@ -5,7 +5,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content="" />
-    <title>github2gh</title>
+    <title><<title>></title>
     <link rel="shortcut icon" href="/static/logo.svg" />
     <link
       href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.3/css/bootstrap.min.css"
@@ -651,7 +651,7 @@
         const getConfig = () => {
           return new Promise((resolve, reject) => {
             axios
-              .get("/config")
+              .get("<<base_path>>/config")
               .then((res) => {
                 resolve(res);
               })
@@ -663,7 +663,7 @@
         const getBackups = () => {
           return new Promise((resolve, reject) => {
             axios
-              .get("/backups")
+              .get("<<base_path>>/backups")
               .then((res) => {
                 resolve(res);
               })
@@ -679,7 +679,7 @@
           toast.show();
         };
         const saveConfig = () => {
-          axios.post("/config", config.value).then((res) => {
+          axios.post("<<base_path>>/config", config.value).then((res) => {
             notify("😁 配置修改成功！");
           });
         };
@@ -715,13 +715,12 @@
           const day = filename.slice(6, 8);
           const hour = filename.slice(8, 10);
           const minute = filename.slice(10, 12);
-          const timestampString = `${year}/${month}/${day} ${hour}:${minute}`;
-          return timestampString;
+          return `${year}/${month}/${day} ${hour}:${minute}`;
         };
         const deleteBackup = () => {
           console.log(selectBackup.value);
           axios
-            .post("/backup/delete", selectBackup.value)
+            .post("<<base_path>>/backup/delete", selectBackup.value)
             .then((res) => {
               getBackups().then((data) => {
                 backups.value = data.data;
@@ -736,12 +735,12 @@
             });
         };
         const restoreBackup = () => {
-          axios.post("/backup/restore", selectBackup.value).then((res) => {
+          axios.post("<<base_path>>/backup/restore", selectBackup.value).then((res) => {
             notify(`😁 备份:${selectBackup.value.name}还原成功！`);
           });
         };
         const runBackup = () => {
-          axios.get("/backup/run").then((res) => {
+          axios.get("<<base_path>>/backup/run").then((res) => {
             getBackups().then((data) => {
               backups.value = data.data;
               if (data.data && data.data.length > 0) {
@@ -752,7 +751,7 @@
           });
         };
         const exportFile = (type) => {
-          window.location.href = `/config/export?type=${type}`;
+          window.location.href = `<<base_path>>/config/export?type=${type}`;
         };
         return {
           config,

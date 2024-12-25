@@ -113,18 +113,24 @@ func main() {
 				gin.SetMode(gin.ReleaseMode)
 			}
 			r := gin.Default()
-			r.Any("/static/*filepath", func(c *gin.Context) {
+			basePath := "/"
+			if cfg.WebPath != "/" {
+				basePath = cfg.WebPath
+			}
+			r.Any(basePath+"/static/*filepath", func(c *gin.Context) {
 				staticServer := http.FileServer(http.FS(staticFS))
 				staticServer.ServeHTTP(c.Writer, c.Request)
 			})
 			t, _ := template2.New("custom").Delims("<<", ">>").ParseFS(templatesFS, "templates/*")
 			r.SetHTMLTemplate(t)
-			authorized := r.Group("/", gin.BasicAuth(gin.Accounts{
+
+			authorized := r.Group(basePath, gin.BasicAuth(gin.Accounts{
 				"admin": cfg.WebPwd,
 			}))
 			authorized.GET("/", func(c *gin.Context) {
 				c.HTML(http.StatusOK, "index.html", gin.H{
-					"title": "backup2gh",
+					"title":     "backup2gh",
+					"base_path": basePath,
 				})
 				//test
 				/*data, err := os.ReadFile("D:\\backup2gh\\templates\\index.html")
@@ -266,6 +272,7 @@ func initConfig() {
 			viper.BindEnv("web_port", "WEB_PORT")
 			viper.BindEnv("web_pwd", "WEB_PWD")
 			viper.BindEnv("start_with_restore", "START_WITH_RESTORE")
+			viper.BindEnv("web_path", "WEB_PATH")
 		}
 	} else {
 		debugLog("读取到config.yaml文件")
@@ -278,6 +285,7 @@ func initConfig() {
 	viper.SetDefault("bak_cron", "0 0 0/1 * * ?")
 	viper.SetDefault("run_mode", "1")
 	viper.SetDefault("web_port", "8088")
+	viper.SetDefault("web_path", "")
 	viper.SetDefault("web_pwd", "1234")
 	_ = viper.Unmarshal(&cfg)
 }
@@ -298,6 +306,7 @@ type Cfg struct {
 	WebPort          string `yaml:"web_port" json:"web_port" mapstructure:"web_port"`
 	WebPwd           string `yaml:"web_pwd" json:"web_pwd" mapstructure:"web_pwd"`
 	StartWithRestore string `yaml:"start_with_restore" json:"start_with_restore" mapstructure:"start_with_restore"`
+	WebPath          string `yaml:"web_path" json:"web_path" mapstructure:"web_path"`
 }
 
 func LogEnv() {
