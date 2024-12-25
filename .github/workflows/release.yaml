@@ -12,8 +12,15 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        goos: [linux]
-        goarch: ["386", amd64, arm64]
+        goos: [linux, windows, darwin]
+        goarch: ["386", amd64, arm64, "s390x"]
+        exclude:
+          - goarch: "386"
+            goos: darwin
+          - goarch: s390x
+            goos: windows
+          - goarch: s390x
+            goos: darwin
     steps:
       - uses: actions/checkout@v4
       - uses: wangyoucao577/go-release-action@v1
@@ -25,3 +32,4 @@ jobs:
           binary_name: "backup2gh"
           asset_name: "backup2gh-${{ matrix.goos }}-${{ matrix.goarch }}"
           executable_compression: "upx"
+          md5sum: false
