@@ -319,8 +319,9 @@ func LogEnv() {
 	debugLog("BAK_DELAY_RESTORE：%s", cfg.BakDelayRestore)
 	debugLog("TMP_PATH：%s", tmpPath)
 	debugLog("RUN_MODE：%s", cfg.RunMode)
-	debugLog("RUN_PORT：%s", cfg.WebPort)
+	debugLog("WEB_PORT：%s", cfg.WebPort)
 	debugLog("WEB_PWD：%s", "****")
+	debugLog("WEB_PATH：%s", cfg.WebPath)
 }
 func CronTask() {
 	cronManager.AddFunc(cfg.BakCron, func() {
