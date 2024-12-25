@@ -102,10 +102,10 @@ func main() {
 				delay, _ := strconv.Atoi(cfg.BakDelayRestore)
 				time.Sleep(time.Duration(delay) * time.Minute)
 			}
-			//Restore()
+			Restore()
 		}
 		//定时备份
-		//CronTask()
+		CronTask()
 		if cfg.RunMode == "2" {
 			if cfg.BakLog == "1" {
 				gin.SetMode(gin.DebugMode)
