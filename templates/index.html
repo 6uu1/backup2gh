@@ -5,8 +5,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content="" />
-    <title><<title>></title>
-    <link rel="shortcut icon" href="/static/logo.svg" />
+    <title><<.title>></title>
+    <link rel="shortcut icon" href="<<.base_path>>/fs/static/logo.svg" />
     <link
       href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.3/css/bootstrap.min.css"
       rel="stylesheet" />
@@ -167,7 +167,7 @@
             <h3 class="mb-4 text-center">
               <img
                 id="logo-svg"
-                src="/static/logo.svg"
+                src="<<.base_path>>/fs/static/logo.svg"
                 style="
                   width: 1.5em;
                   margin-right: 0.1em;
@@ -545,12 +545,22 @@
                           <label class="form-check-label" for="web">WEB</label>
                         </div>
                       </div>
-                      <label class="col-sm-2 col-form-label">端口绑定</label>
-                      <div class="col-sm-4">
+                      <label class="col-sm-2 col-form-label">端口路径</label>
+                      <div class="col-sm-2">
                         <input
                           type="txt"
                           class="form-control"
+                          name="webPort"
+                          placeholder="端口"
                           v-model="config.web_port" />
+                      </div>
+                      <div class="col-sm-2">
+                        <input
+                          type="txt"
+                          class="form-control"
+                          name="webPath"
+                          placeholder="路径"
+                          v-model="config.web_path" />
                       </div>
                     </div>
                     <div class="mb-3 row">
@@ -651,7 +661,7 @@
         const getConfig = () => {
           return new Promise((resolve, reject) => {
             axios
-              .get("<<base_path>>/config")
+              .get("<<.base_path>>/config")
               .then((res) => {
                 resolve(res);
               })
@@ -663,7 +673,7 @@
         const getBackups = () => {
           return new Promise((resolve, reject) => {
             axios
-              .get("<<base_path>>/backups")
+              .get("<<.base_path>>/backups")
               .then((res) => {
                 resolve(res);
               })
@@ -679,7 +689,7 @@
           toast.show();
         };
         const saveConfig = () => {
-          axios.post("<<base_path>>/config", config.value).then((res) => {
+          axios.post("<<.base_path>>/config", config.value).then((res) => {
             notify("😁 配置修改成功！");
           });
         };
@@ -720,7 +730,7 @@
         const deleteBackup = () => {
           console.log(selectBackup.value);
           axios
-            .post("<<base_path>>/backup/delete", selectBackup.value)
+            .post("<<.base_path>>/backup/delete", selectBackup.value)
             .then((res) => {
               getBackups().then((data) => {
                 backups.value = data.data;
@@ -735,12 +745,12 @@
             });
         };
         const restoreBackup = () => {
-          axios.post("<<base_path>>/backup/restore", selectBackup.value).then((res) => {
+          axios.post("<<.base_path>>/backup/restore", selectBackup.value).then((res) => {
             notify(`😁 备份:${selectBackup.value.name}还原成功！`);
           });
         };
         const runBackup = () => {
-          axios.get("<<base_path>>/backup/run").then((res) => {
+          axios.get("<<.base_path>>/backup/run").then((res) => {
             getBackups().then((data) => {
               backups.value = data.data;
               if (data.data && data.data.length > 0) {
@@ -751,7 +761,7 @@
           });
         };
         const exportFile = (type) => {
-          window.location.href = `<<base_path>>/config/export?type=${type}`;
+          window.location.href = `<<.base_path>>/config/export?type=${type}`;
         };
         return {
           config,

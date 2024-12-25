@@ -113,17 +113,13 @@ func main() {
 				gin.SetMode(gin.ReleaseMode)
 			}
 			r := gin.Default()
-			basePath := "/"
+			t, _ := template2.New("custom").Delims("<<", ">>").ParseFS(templatesFS, "templates/*")
+			r.SetHTMLTemplate(t)
+			basePath := ""
 			if cfg.WebPath != "/" {
 				basePath = cfg.WebPath
 			}
-			r.Any(basePath+"/static/*filepath", func(c *gin.Context) {
-				staticServer := http.FileServer(http.FS(staticFS))
-				staticServer.ServeHTTP(c.Writer, c.Request)
-			})
-			t, _ := template2.New("custom").Delims("<<", ">>").ParseFS(templatesFS, "templates/*")
-			r.SetHTMLTemplate(t)
-
+			r.StaticFS(basePath+"/fs", http.FS(staticFS))
 			authorized := r.Group(basePath, gin.BasicAuth(gin.Accounts{
 				"admin": cfg.WebPwd,
 			}))

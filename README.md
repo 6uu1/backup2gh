@@ -10,8 +10,8 @@
 |-------------------|------|----------------------------|------------------------|
 | RUN_MODE          | 否    | 运行模式                       | 1-独立运行(默认), 2-web      |
 | WEB_PORT          | 否    | web端口                      | 默认8088                 |
-| WEB_PATH           | 否    | web请求前缀，用于反代路径配置           | /backup2gh             |
-| WEB_PWD           | 否    | web密码，账号默认：admin           | 1234                   |
+| WEB_PATH           | 否    | web请求前缀，用于反代路径配置,默认空       | /backup2gh             |
+| WEB_PWD           | 否    | web密码，默认账号：admin, 密码：1234  | 1234                   |
 | BAK_APP_NAME      | 是    | 备份应用名称，用于区分不同应用的备份数据       | uptime                 |
 | BAK_DATA_DIR      | 是    | 计划备份的应用程序数据目录              | /app/data              |
 | BAK_GITHUB_TOKEN  | 是    | 备份github账号的`PAT`           |                        |
@@ -64,4 +64,4 @@ CMD ["sh", "-c", "nohup /home/app/backup2gh & node server/server.js"]
 2. CMD命令将备份程序执行在前，也可以使用`ENTRYPOINT`
 3. 单仓库多应用时，定时执行的时间尽量错开，避免SHA变更导致的备份失败。
 4. 大部分情况下，备份频率不用很高、备份文件不用保留很多。
-5. WEB仅供临时或测试使用，默认账号`admin`
+5. WEB仅供临时或测试使用，请勿在生产环境长时间使用默认账号`admin`
