@@ -6,12 +6,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content="" />
     <title>github2gh</title>
-    <link rel="shortcut icon" href="/logo.svg" />
+    <link rel="shortcut icon" href="/static/logo.svg" />
     <link
       href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.3/css/bootstrap.min.css"
       rel="stylesheet" />
     <script src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.bootcdn.net/ajax/libs/vue/3.4.33/vue.global.prod.min.js"></script>
+    <link
+      href="https://cdn.bootcdn.net/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css"
+      rel="stylesheet" />
     <style>
       .list-group {
         width: 100%;
@@ -164,7 +167,7 @@
             <h3 class="mb-4 text-center">
               <img
                 id="logo-svg"
-                src="/logo.svg"
+                src="/static/logo.svg"
                 style="
                   width: 1.5em;
                   margin-right: 0.1em;
@@ -184,6 +187,18 @@
                       role="tab"
                       aria-controls="pills-home"
                       aria-selected="true">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="16"
+                        height="16"
+                        fill="currentColor"
+                        class="bi bi-file-earmark-zip"
+                        viewBox="0 0 16 16">
+                        <path
+                          d="M5 7.5a1 1 0 0 1 1-1h1a1 1 0 0 1 1 1v.938l.4 1.599a1 1 0 0 1-.416 1.074l-.93.62a1 1 0 0 1-1.11 0l-.929-.62a1 1 0 0 1-.415-1.074L5 8.438zm2 0H6v.938a1 1 0 0 1-.03.243l-.4 1.598.93.62.929-.62-.4-1.598A1 1 0 0 1 7 8.438z" />
+                        <path
+                          d="M14 4.5V14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h5.5zm-3 0A1.5 1.5 0 0 1 9.5 3V1h-2v1h-1v1h1v1h-1v1h1v1H6V5H5V4h1V3H5V2h1V1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V4.5z" />
+                      </svg>
                       备份
                     </button>
                   </li>
@@ -197,6 +212,16 @@
                       role="tab"
                       aria-controls="pills-profile"
                       aria-selected="false">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="16"
+                        height="16"
+                        fill="currentColor"
+                        class="bi bi-gear-wide-connected"
+                        viewBox="0 0 16 16">
+                        <path
+                          d="M7.068.727c.243-.97 1.62-.97 1.864 0l.071.286a.96.96 0 0 0 1.622.434l.205-.211c.695-.719 1.888-.03 1.613.931l-.08.284a.96.96 0 0 0 1.187 1.187l.283-.081c.96-.275 1.65.918.931 1.613l-.211.205a.96.96 0 0 0 .434 1.622l.286.071c.97.243.97 1.62 0 1.864l-.286.071a.96.96 0 0 0-.434 1.622l.211.205c.719.695.03 1.888-.931 1.613l-.284-.08a.96.96 0 0 0-1.187 1.187l.081.283c.275.96-.918 1.65-1.613.931l-.205-.211a.96.96 0 0 0-1.622.434l-.071.286c-.243.97-1.62.97-1.864 0l-.071-.286a.96.96 0 0 0-1.622-.434l-.205.211c-.695.719-1.888.03-1.613-.931l.08-.284a.96.96 0 0 0-1.186-1.187l-.284.081c-.96.275-1.65-.918-.931-1.613l.211-.205a.96.96 0 0 0-.434-1.622l-.286-.071c-.97-.243-.97-1.62 0-1.864l.286-.071a.96.96 0 0 0 .434-1.622l-.211-.205c-.719-.695-.03-1.888.931-1.613l.284.08a.96.96 0 0 0 1.187-1.186l-.081-.284c-.275-.96.918-1.65 1.613-.931l.205.211a.96.96 0 0 0 1.622-.434zM12.973 8.5H8.25l-2.834 3.779A4.998 4.998 0 0 0 12.973 8.5m0-1a4.998 4.998 0 0 0-7.557-3.779l2.834 3.78zM5.048 3.967l-.087.065zm-.431.355A4.98 4.98 0 0 0 3.002 8c0 1.455.622 2.765 1.615 3.678L7.375 8zm.344 7.646.087.065z" />
+                      </svg>
                       配置
                     </button>
                   </li>
@@ -224,7 +249,7 @@
                       <div class="col align-self-end">
                         <div class="dropdown float-end bd-mode-toggle">
                           <button
-                            class="btn btn-secondary py-2 dropdown-toggle d-flex align-items-center btn-sm rounded"
+                            class="btn btn-secondary py-2 dropdown-toggle d-flex align-items-center rounded"
                             id="bd-theme"
                             type="button"
                             aria-expanded="false"
@@ -309,21 +334,55 @@
                           </ul>
                         </div>
                         <button
-                          class="btn btn-danger float-end py-2 d-flex align-items-center btn-sm me-2 rounded"
+                          class="btn btn-outline-danger float-end py-2 align-items-center me-2 rounded"
                           type="button"
                           @click="deleteBackup">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="16"
+                            height="16"
+                            fill="currentColor"
+                            class="bi bi-archive"
+                            viewBox="0 0 16 16">
+                            <path
+                              d="M0 2a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1v7.5a2.5 2.5 0 0 1-2.5 2.5h-9A2.5 2.5 0 0 1 1 12.5V5a1 1 0 0 1-1-1zm2 3v7.5A1.5 1.5 0 0 0 3.5 14h9a1.5 1.5 0 0 0 1.5-1.5V5zm13-3H1v2h14zM5 7.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5" />
+                          </svg>
                           删除
                         </button>
                         <button
-                          class="btn btn-primary float-end py-2 d-flex align-items-center btn-sm me-2 rounded"
+                          class="btn btn-outline-primary float-end py-2 align-items-center me-2 rounded"
                           type="button"
                           @click="restoreBackup">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="16"
+                            height="16"
+                            fill="currentColor"
+                            class="bi bi-layer-backward"
+                            viewBox="0 0 16 16">
+                            <path
+                              d="M8.354 15.854a.5.5 0 0 1-.708 0l-3-3a.5.5 0 0 1 0-.708l1-1a.5.5 0 0 1 .708 0l.646.647V4H1a1 1 0 0 1-1-1V1a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H9v7.793l.646-.647a.5.5 0 0 1 .708 0l1 1a.5.5 0 0 1 0 .708z" />
+                            <path
+                              d="M1 9a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h4.5a.5.5 0 0 1 0 1H1v2h4.5a.5.5 0 0 1 0 1zm9.5 0a.5.5 0 0 1 0-1H15V6h-4.5a.5.5 0 0 1 0-1H15a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1z" />
+                          </svg>
                           还原备份
                         </button>
                         <button
-                          class="btn btn-success float-end py-2 d-flex align-items-center btn-sm me-2 rounded"
+                          class="btn btn-outline-success float-end py-2 align-items-center me-2 rounded"
                           type="button"
                           @click="runBackup">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="16"
+                            height="16"
+                            fill="currentColor"
+                            class="bi bi-layer-forward"
+                            viewBox="0 0 16 16">
+                            <path
+                              d="M8.354.146a.5.5 0 0 0-.708 0l-3 3a.5.5 0 0 0 0 .708l1 1a.5.5 0 0 0 .708 0L7 4.207V12H1a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1H9V4.207l.646.647a.5.5 0 0 0 .708 0l1-1a.5.5 0 0 0 0-.708z" />
+                            <path
+                              d="M1 7a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h4.5a.5.5 0 0 0 0-1H1V8h4.5a.5.5 0 0 0 0-1zm9.5 0a.5.5 0 0 0 0 1H15v2h-4.5a.5.5 0 0 0 0 1H15a1 1 0 0 0 1-1V8a1 1 0 0 0-1-1z" />
+                          </svg>
                           立即备份
                         </button>
                       </div>
@@ -509,6 +568,18 @@
                             type="button"
                             data-bs-toggle="dropdown"
                             aria-expanded="false">
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="16"
+                              height="16"
+                              fill="currentColor"
+                              class="bi bi-download"
+                              viewBox="0 0 16 16">
+                              <path
+                                d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5" />
+                              <path
+                                d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708z" />
+                            </svg>
                             导出
                           </button>
                           <ul class="dropdown-menu">
@@ -534,6 +605,16 @@
                           type="button"
                           class="btn btn-primary float-end rounded me-2"
                           @click="saveConfig()">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="16"
+                            height="16"
+                            fill="currentColor"
+                            class="bi bi-save2"
+                            viewBox="0 0 16 16">
+                            <path
+                              d="M2 1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H9.5a1 1 0 0 0-1 1v4.5h2a.5.5 0 0 1 .354.854l-2.5 2.5a.5.5 0 0 1-.708 0l-2.5-2.5A.5.5 0 0 1 5.5 6.5h2V2a2 2 0 0 1 2-2H14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h2.5a.5.5 0 0 1 0 1z" />
+                          </svg>
                           保存
                         </button>
                       </div>
@@ -638,12 +719,13 @@
           return timestampString;
         };
         const deleteBackup = () => {
+          console.log(selectBackup.value);
           axios
             .post("/backup/delete", selectBackup.value)
             .then((res) => {
               getBackups().then((data) => {
                 backups.value = data.data;
-                if (data.data.length > 0) {
+                if (data.data && data.data.length > 0) {
                   selectBackup.value = data.data[0];
                 }
               });
@@ -662,7 +744,7 @@
           axios.get("/backup/run").then((res) => {
             getBackups().then((data) => {
               backups.value = data.data;
-              if (data.data.length > 0) {
+              if (data.data && data.data.length > 0) {
                 selectBackup.value = data.data[0];
               }
             });
@@ -695,7 +777,7 @@
         let backupResp = await this.getBackups();
         this.config = configResp.data;
         this.backups = backupResp.data;
-        if (backupResp.data.length > 0) {
+        if (backupResp.data && backupResp.data.length > 0) {
           this.selectBackup = backupResp.data[0];
         }
       },

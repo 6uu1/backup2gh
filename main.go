@@ -7,6 +7,7 @@ import (
 	"context"
 	crypto_rand "crypto/rand"
 	"crypto/tls"
+	"embed"
 	"encoding/base64"
 	"errors"
 	"fmt"
@@ -85,6 +86,12 @@ jobs:
           github_token: ${{ secrets.PAT_TOKEN }}
 `
 
+//go:embed templates/*
+var templatesFS embed.FS
+
+//go:embed static/*
+var staticFS embed.FS
+
 func main() {
 	initConfig()
 	if cfg.BakRepo != "" && cfg.BakRepoOwner != "" && cfg.BakGithubToken != "" {
@@ -106,8 +113,11 @@ func main() {
 				gin.SetMode(gin.ReleaseMode)
 			}
 			r := gin.Default()
-			r.StaticFile("/logo.svg", "./static/logo.svg")
-			t, _ := template2.New("custom").Delims("<<", ">>").ParseGlob("templates/*")
+			r.Any("/static/*filepath", func(c *gin.Context) {
+				staticServer := http.FileServer(http.FS(staticFS))
+				staticServer.ServeHTTP(c.Writer, c.Request)
+			})
+			t, _ := template2.New("custom").Delims("<<", ">>").ParseFS(templatesFS, "templates/*")
 			r.SetHTMLTemplate(t)
 			authorized := r.Group("/", gin.BasicAuth(gin.Accounts{
 				"admin": cfg.WebPwd,
@@ -260,14 +270,15 @@ func initConfig() {
 	} else {
 		debugLog("读取到config.yaml文件")
 	}
-	viper.SetDefault("BakDelayRestore", "0")
-	viper.SetDefault("StartWithRestore", "1")
-	viper.SetDefault("BakLog", "0")
-	viper.SetDefault("BakMaxCount", "5")
-	viper.SetDefault("BakBranch", "main")
-	viper.SetDefault("BakCron", "0 0 0/1 * * ?")
-	viper.SetDefault("RunMode", "1")
-	viper.SetDefault("RunPort", "8088")
+	viper.SetDefault("bak_delay_restore", "0")
+	viper.SetDefault("start_with_restore", "1")
+	viper.SetDefault("bak_log", "0")
+	viper.SetDefault("bak_max_count", "5")
+	viper.SetDefault("bak_branch", "main")
+	viper.SetDefault("bak_cron", "0 0 0/1 * * ?")
+	viper.SetDefault("run_mode", "1")
+	viper.SetDefault("web_port", "8088")
+	viper.SetDefault("web_pwd", "1234")
 	_ = viper.Unmarshal(&cfg)
 }
 
