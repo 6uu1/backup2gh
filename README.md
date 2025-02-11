@@ -1,7 +1,4 @@
 ## backup-to-github
-
----
-
 English | [中文](https://github.com/laboratorys/backup2gh/blob/main/README_CN.md)
 ### Features
 1. A zero-cost solution for cloud containers where data is lost after a restart, especially for applications based on SQLite.
@@ -74,6 +71,7 @@ CMD ["sh", "-c", "nohup /home/app/backup2gh & node server/server.js"]
 apk add --no-cache curl tar libc6-compat
 ```
 Ubuntu-based images do not require libc6-compat.
+
 2. Running the backup program at startup:
  - The backup program is executed before the main application using CMD.
  - You can also use ENTRYPOINT instead.

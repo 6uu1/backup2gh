@@ -1,7 +1,4 @@
 ## backup-to-github
-
----
-
 [English](https://github.com/laboratorys/backup2gh/blob/main/README.md) | 中文
 ### 特性
 1. 主要是针对一些云容器在重启后，数据会丢失的0成本解决方案，尤其是很多基于sqlite的应用。
