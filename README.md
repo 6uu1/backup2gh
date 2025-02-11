@@ -66,11 +66,11 @@ CMD ["sh", "-c", "nohup /home/app/backup2gh & node server/server.js"]
 ```
 ### FAQ
 1. Dependency issues on Alpine Linux:
-   To ensure backup2gh runs properly on an Alpine-based image, install the required dependencies:
-```shell
-apk add --no-cache curl tar libc6-compat
-```
-Ubuntu-based images do not require libc6-compat.
+ - To ensure backup2gh runs properly on an Alpine-based image, install the required dependencies:
+   ```shell
+   apk add --no-cache curl tar libc6-compat
+   ```
+ - Ubuntu-based images do not require libc6-compat.
 
 2. Running the backup program at startup:
  - The backup program is executed before the main application using CMD.
