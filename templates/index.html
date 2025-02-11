@@ -728,7 +728,6 @@
           return `${year}/${month}/${day} ${hour}:${minute}`;
         };
         const deleteBackup = () => {
-          console.log(selectBackup.value);
           axios
             .post("<<.base_path>>/backup/delete", selectBackup.value)
             .then((res) => {
@@ -745,9 +744,11 @@
             });
         };
         const restoreBackup = () => {
-          axios.post("<<.base_path>>/backup/restore", selectBackup.value).then((res) => {
-            notify(`😁 备份:${selectBackup.value.name}还原成功！`);
-          });
+          axios
+            .post("<<.base_path>>/backup/restore", selectBackup.value)
+            .then((res) => {
+              notify(`😁 备份:${selectBackup.value.name}还原成功！`);
+            });
         };
         const runBackup = () => {
           axios.get("<<.base_path>>/backup/run").then((res) => {

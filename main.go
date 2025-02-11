@@ -349,14 +349,17 @@ func Restore() {
 
 func RestoreFromContent(content *github.RepositoryContent) {
 	debugLog("Get Last Backup File: %s， Size: %d，Url: %s", content.GetPath(), content.GetSize(), content.GetDownloadURL())
-	url := content.GetDownloadURL()
+	dUrl := content.GetDownloadURL()
 	//下载、解压文件
 	zipFilePath := filepath.Join(tmpPath, *content.Name)
-	DownloadFile(url, zipFilePath)
+	err := DownloadFile(dUrl, zipFilePath)
 	debugLog("DownloadFile: %s", zipFilePath)
-	Unzip(zipFilePath, cfg.BakDataDir)
-	os.Remove(zipFilePath)
+	err = Unzip(zipFilePath, cfg.BakDataDir)
+	err = os.Remove(zipFilePath)
 	debugLog("Unzip && Remove: %s", zipFilePath)
+	if err != nil {
+		debugLog("RestoreFromContent error: %v", err)
+	}
 }
 
 func debugLog(str string, v ...any) {
@@ -467,7 +470,7 @@ func Backup() error {
 		var buf bytes.Buffer
 		err = tmpl.Execute(&buf, readmeContent)
 		if err != nil {
-			panic(err)
+			return err
 		}
 		readmeStr := buf.String()
 		debugLog(readmeStr)
@@ -558,7 +561,7 @@ func AddOrUpdateFile(client *github.Client, ctx context.Context, branch, filePat
 	return err
 }
 
-func DownloadFile(downUrl, filePath string) {
+func DownloadFile(downUrl, filePath string) error {
 
 	tr := &http.Transport{TLSClientConfig: &tls.Config{
 		InsecureSkipVerify: true,
@@ -575,11 +578,11 @@ func DownloadFile(downUrl, filePath string) {
 
 	req, err := http.NewRequest(http.MethodGet, downUrl, nil)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	r, err := client.Do(req)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	if r != nil {
 		defer r.Body.Close()
@@ -590,12 +593,13 @@ func DownloadFile(downUrl, filePath string) {
 	file, err := os.Create(filePath)
 	defer file.Close()
 	if err != nil {
-		panic(err)
+		return err
 	}
 	// 获得文件的writer对象
 	writer := bufio.NewWriter(file)
 
-	io.Copy(writer, reader)
+	_, err = io.Copy(writer, reader)
+	return err
 }
 
 // 打包成zip文件
