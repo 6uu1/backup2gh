@@ -94,6 +94,8 @@ var staticFS embed.FS
 
 func main() {
 	initConfig()
+	// 初始化日志文件
+	initLogFile()
 	if cfg.BakRepo != "" && cfg.BakRepoOwner != "" && cfg.BakGithubToken != "" {
 		LogEnv()
 		if cfg.StartWithRestore == "1" {
@@ -185,6 +187,23 @@ func main() {
 	} else {
 		debugLog("No Valid Config found!")
 	}
+}
+
+func initLogFile() {
+	if cfg.BakLog == "1" {
+		var err error
+		logFile, err := os.OpenFile("debug.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+		if err != nil {
+			log.Fatalf("无法打开日志文件: %v", err)
+		}
+		defer logFile.Close()
+		log.SetOutput(logFile)
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			debugLog("发生严重错误: %v\n", r)
+		}
+	}()
 }
 
 func getConfigData(exportType string) []byte {
@@ -329,8 +348,8 @@ func CronTask() {
 			func() error {
 				return Backup()
 			},
-			retry.Delay(3*time.Second),
-			retry.Attempts(3),
+			retry.Delay(30*time.Second),
+			retry.Attempts(4),
 			retry.DelayType(retry.FixedDelay),
 		)
 	})
