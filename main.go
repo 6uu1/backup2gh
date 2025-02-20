@@ -390,6 +390,17 @@ func debugLog(str string, v ...any) {
 		}
 	}
 }
+
+func errLog(str string, v ...any) {
+	if cfg.BakLog == "1" {
+		str = "error: " + str
+		if v != nil {
+			log.Printf(str, v...)
+		} else {
+			log.Println(str)
+		}
+	}
+}
 func getBackUps() []*github.RepositoryContent {
 	ctx := context.Background()
 	client, _ := getClient()
@@ -403,7 +414,12 @@ func Backup() error {
 	fileName := chineseTimeStr(time.Now(), "200601021504") + ".zip"
 	zipFilePath := filepath.Join(tmpPath, fileName)
 	debugLog("Start Zip File: %s", zipFilePath)
-	Zip(cfg.BakDataDir, zipFilePath)
+	tmpBakDir := filepath.Join(tmpPath, "data")
+	er := CopyDir(cfg.BakDataDir, tmpBakDir)
+	if er != nil {
+		return er
+	}
+	Zip(tmpBakDir, zipFilePath)
 	commitMessage := "Add File"
 	fileContent, _ := os.ReadFile(zipFilePath)
 	client, err := getClient()
@@ -621,8 +637,74 @@ func DownloadFile(downUrl, filePath string) error {
 	return err
 }
 
+// CopyDir 递归复制文件夹
+func CopyDir(src, dst string) error {
+	// 校验源目录合法性
+	srcInfo, err := os.Stat(src)
+	if err != nil {
+		return fmt.Errorf("源目录不存在: %v", err)
+	}
+	if !srcInfo.IsDir() {
+		return fmt.Errorf("%s 不是目录", src)
+	}
+
+	// 创建目标目录 (保留原目录权限)
+	if err := os.MkdirAll(dst, srcInfo.Mode()); err != nil {
+		return fmt.Errorf("创建目标目录失败: %v", err)
+	}
+
+	// 遍历源目录
+	return filepath.Walk(src, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err // 优先处理遍历错误
+		}
+
+		// 计算相对路径
+		relPath, _ := filepath.Rel(src, path)
+		dstPath := filepath.Join(dst, relPath)
+
+		// 处理目录
+		if info.IsDir() {
+			return os.MkdirAll(dstPath, info.Mode())
+		}
+
+		// 处理常规文件
+		return copyFile(path, dstPath, info)
+	})
+}
+
+// copyFile 复制单个文件 (保留权限和时间戳)
+func copyFile(src, dst string, info os.FileInfo) error {
+	// 打开源文件
+	srcFile, err := os.Open(src)
+	if err != nil {
+		return fmt.Errorf("打开源文件失败: %v", err)
+	}
+	defer srcFile.Close()
+
+	// 创建目标文件 (同权限)
+	dstFile, err := os.OpenFile(dst, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, info.Mode())
+	if err != nil {
+		return fmt.Errorf("创建目标文件失败: %v", err)
+	}
+	defer dstFile.Close()
+
+	// 复制内容
+	if _, err := io.Copy(dstFile, srcFile); err != nil {
+		return fmt.Errorf("复制内容失败: %v", err)
+	}
+
+	// 保留修改时间
+	if err := os.Chtimes(dst, info.ModTime(), info.ModTime()); err != nil {
+		return fmt.Errorf("保留时间戳失败: %v", err)
+	}
+
+	return nil
+}
+
 // 打包成zip文件
 func Zip(src_dir string, zip_file_name string) {
+
 	// 预防：旧文件无法覆盖
 	os.RemoveAll(zip_file_name)
 
@@ -640,26 +722,30 @@ func Zip(src_dir string, zip_file_name string) {
 		if path == src_dir {
 			return nil
 		}
-
 		// 获取：文件头信息
-		header, _ := zip.FileInfoHeader(info)
-		relPath, _ := filepath.Rel(src_dir, path)
-		header.Name = filepath.ToSlash(relPath)
+		header, err := zip.FileInfoHeader(info)
+		if err == nil {
+			relPath, _ := filepath.Rel(src_dir, path)
+			_, er := os.Stat(relPath)
+			if er == nil {
+				header.Name = filepath.ToSlash(relPath)
 
-		// 判断：文件是不是文件夹
-		if info.IsDir() {
-			header.Name += "/"
-		} else {
-			// 设置：zip的文件压缩算法
-			header.Method = zip.Deflate
-		}
+				// 判断：文件是不是文件夹
+				if info.IsDir() {
+					header.Name += "/"
+				} else {
+					// 设置：zip的文件压缩算法
+					header.Method = zip.Deflate
+				}
 
-		// 创建：压缩包头部信息
-		writer, _ := archive.CreateHeader(header)
-		if !info.IsDir() {
-			file, _ := os.Open(path)
-			defer file.Close()
-			io.Copy(writer, file)
+				// 创建：压缩包头部信息
+				writer, _ := archive.CreateHeader(header)
+				if !info.IsDir() {
+					file, _ := os.Open(path)
+					defer file.Close()
+					io.Copy(writer, file)
+				}
+			}
 		}
 		return nil
 	})
