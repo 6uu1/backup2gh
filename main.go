@@ -100,16 +100,6 @@ func main() {
 	initLogFile()
 	if cfg.BakRepo != "" && cfg.BakRepoOwner != "" && cfg.BakGithubToken != "" {
 		LogEnv()
-		if cfg.StartWithRestore == "1" {
-			if cfg.BakDelayRestore != "" {
-				//启动时延时还原数据
-				delay, _ := strconv.Atoi(cfg.BakDelayRestore)
-				time.Sleep(time.Duration(delay) * time.Minute)
-			}
-			Restore()
-		}
-		//定时备份
-		CronTask()
 		if cfg.RunMode == "2" {
 			if cfg.BakLog == "1" {
 				gin.SetMode(gin.DebugMode)
@@ -182,10 +172,19 @@ func main() {
 				c.Data(http.StatusOK, "application/octet-stream", getConfigData(exportType))
 			})
 			_ = r.Run(fmt.Sprintf(":%s", cfg.WebPort))
-		} else {
-			defer cronManager.Stop()
-			select {}
 		}
+		if cfg.StartWithRestore == "1" {
+			if cfg.BakDelayRestore != "" {
+				//启动时延时还原数据
+				delay, _ := strconv.Atoi(cfg.BakDelayRestore)
+				time.Sleep(time.Duration(delay) * time.Minute)
+			}
+			Restore()
+		}
+		//定时备份
+		CronTask()
+		defer cronManager.Stop()
+		select {}
 	} else {
 		debugLog("No Valid Config found!")
 	}
