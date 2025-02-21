@@ -408,8 +408,7 @@
                             :for="'backup_op_' +item.sha">
                             <strong class="fw-semibold">{{item.name}}</strong>
                             <span class="d-block small opacity-75"
-                              >日期：{{parseFileName(item.name)}}
-                              11:50，大小：{{sizeF(item.size)}}，<a
+                              >日期：{{parseFileName(item.name)}}，大小：{{sizeF(item.size)}}，<a
                                 :href="item.download_url"
                                 class="text-decoration-none link-success"
                                 target="_blank"
@@ -727,21 +726,24 @@
           const minute = filename.slice(10, 12);
           return `${year}/${month}/${day} ${hour}:${minute}`;
         };
-        const deleteBackup = () => {
-          axios
-            .post("<<.base_path>>/backup/delete", selectBackup.value)
-            .then((res) => {
-              getBackups().then((data) => {
-                backups.value = data.data;
-                if (data.data && data.data.length > 0) {
-                  selectBackup.value = data.data[0];
-                }
+        const deleteBackup = async() => {
+          const result = await confirm();
+          if(result){
+            axios
+              .post("<<.base_path>>/backup/delete", selectBackup.value)
+              .then((res) => {
+                getBackups().then((data) => {
+                  backups.value = data.data;
+                  if (data.data && data.data.length > 0) {
+                    selectBackup.value = data.data[0];
+                  }
+                });
+                notify("😁 备份删除成功！");
+              })
+              .catch((err) => {
+                notify("🥹 备份删除失败！");
               });
-              notify("😁 备份删除成功！");
-            })
-            .catch((err) => {
-              notify("🥹 备份删除失败！");
-            });
+          }
         };
         const restoreBackup = () => {
           axios
@@ -763,6 +765,48 @@
         };
         const exportFile = (type) => {
           window.location.href = `<<.base_path>>/config/export?type=${type}`;
+        };
+        const confirm = async() => {
+          return await b_confirm('确认删除该备份吗？')
+        };
+        const  b_confirm = async(msg) =>{
+          const modalElem = document.createElement('div')
+          modalElem.id = "modal-confirm"
+          modalElem.className = "modal"
+          modalElem.innerHTML = `
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-body fs-6">
+          <p>${msg}🤔</p>
+      </div>    <!-- modal-body -->
+      <div class="modal-footer" style="border-top:0px">
+        <button id="modal-btn-aceptar" type="button" class="btn btn-primary">确认</button>
+        <button id="modal-btn-descartar" type="button" class="btn btn-secondary">取消</button>
+      </div>
+    </div>
+  </div>
+  `
+          const myModal = new bootstrap.Modal(modalElem, {
+            keyboard: false,
+            backdrop: 'static'
+          })
+          myModal.show()
+
+          return new Promise((resolve, reject) => {
+            document.body.addEventListener('click', response)
+
+            function response(e) {
+              let bool = false
+              if (e.target.id == 'modal-btn-descartar') bool = false
+              else if (e.target.id == 'modal-btn-aceptar') bool = true
+              else return
+
+              document.body.removeEventListener('click', response)
+              document.body.querySelector('.modal-backdrop').remove()
+              modalElem.remove()
+              resolve(bool)
+            }
+          })
         };
         return {
           config,
@@ -786,7 +830,7 @@
         let configResp = await this.getConfig();
         let backupResp = await this.getBackups();
         this.config = configResp.data;
-        this.backups = backupResp.data;
+        this.backups = backupResp.data.reverse();
         if (backupResp.data && backupResp.data.length > 0) {
           this.selectBackup = backupResp.data[0];
         }
