@@ -92,6 +92,8 @@ var templatesFS embed.FS
 //go:embed static/*
 var staticFS embed.FS
 
+var logFile *os.File
+
 func main() {
 	initConfig()
 	// 初始化日志文件
@@ -187,17 +189,18 @@ func main() {
 	} else {
 		debugLog("No Valid Config found!")
 	}
+	defer logFile.Close()
 }
 
 func initLogFile() {
 	if cfg.BakLog == "1" {
 		var err error
-		logFile, err := os.OpenFile("debug.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+		logFile, err = os.OpenFile("debug.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 		if err != nil {
 			log.Fatalf("无法打开日志文件: %v", err)
 		}
-		defer logFile.Close()
-		log.SetOutput(logFile)
+		mw := io.MultiWriter(os.Stdout, logFile)
+		log.SetOutput(mw)
 	}
 	defer func() {
 		if r := recover(); r != nil {
@@ -704,7 +707,6 @@ func copyFile(src, dst string, info os.FileInfo) error {
 
 // 打包成zip文件
 func Zip(src_dir string, zip_file_name string) {
-
 	// 预防：旧文件无法覆盖
 	os.RemoveAll(zip_file_name)
 
@@ -722,29 +724,29 @@ func Zip(src_dir string, zip_file_name string) {
 		if path == src_dir {
 			return nil
 		}
+		_, er := os.Stat(path)
+		if er != nil {
+			return nil
+		}
 		// 获取：文件头信息
 		header, err := zip.FileInfoHeader(info)
 		if err == nil {
 			relPath, _ := filepath.Rel(src_dir, path)
-			_, er := os.Stat(relPath)
-			if er == nil {
-				header.Name = filepath.ToSlash(relPath)
+			header.Name = filepath.ToSlash(relPath)
 
-				// 判断：文件是不是文件夹
-				if info.IsDir() {
-					header.Name += "/"
-				} else {
-					// 设置：zip的文件压缩算法
-					header.Method = zip.Deflate
-				}
-
-				// 创建：压缩包头部信息
-				writer, _ := archive.CreateHeader(header)
-				if !info.IsDir() {
-					file, _ := os.Open(path)
-					defer file.Close()
-					io.Copy(writer, file)
-				}
+			// 判断：文件是不是文件夹
+			if info.IsDir() {
+				header.Name += "/"
+			} else {
+				// 设置：zip的文件压缩算法
+				header.Method = zip.Deflate
+			}
+			// 创建：压缩包头部信息
+			writer, _ := archive.CreateHeader(header)
+			if !info.IsDir() {
+				file, _ := os.Open(path)
+				defer file.Close()
+				io.Copy(writer, file)
 			}
 		}
 		return nil
