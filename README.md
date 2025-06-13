@@ -9,22 +9,25 @@ English | [中文](https://github.com/laboratorys/backup2gh/blob/main/README_CN.
 ### Environment Variables
 | Variable Name               | Required | Description                                                                | Example                     |
 |-------------------|------|----------------------------------------------------------------------------|------------------------|
-| RUN_MODE          | No    | Running mode                                                               | 1-Standalone (default), 2-Web      |
-| WEB_PORT          | No    | Web server port                                                            | Default: 8088               |
-| WEB_PATH           | No    | Web request prefix for reverse proxy configuration (default: empty)        | /backup2gh             |
-| WEB_PWD           | No    | Web interface password (default: admin:1234)                               | 1234                   |
-| BAK_APP_NAME      | 是    | Name of the application to back up (used for distinguishing different apps) | uptime                 |
-| BAK_DATA_DIR      | 是    | Directory of the application data to back up                               | /app/data              |
-| BAK_GITHUB_TOKEN  | 是    | Personal Access Token (`PAT`) for GitHub backup                              |                        |
-| BAK_REPO          | 是    | 	Backup repository name                                                                     | xxx_repo               |
-| BAK_REPO_OWNER    | 是    | Owner of the backup repository                                                                   | xxx                    |
-| BAK_PROXY         | No    | Proxy for backup (not needed if there's no network issue)                                                           | http://localhost:10808 |
-| BAK_CRON          | No    | Cron schedule for backups (default: 0 0 0/1 * * ?)                                                 |                        |
-| BAK_MAX_COUNT     | No    | Maximum number of backup files to keep in the repository (default: 5)                                                       | 5                      |
-| BAK_LOG           | No    | Enable logging (for debugging)                                                                  | 1                      |
-| BAK_BRANCH        | No    | Delay restore after container startup (in minutes)                                                           | main                   |
-| BAK_DELAY_RESTORE | No    | Pull the latest backup and restore on startup (default: enabled)                                                 | 1                      |
-| START_WITH_RESTORE | No    | Pull the latest backup and restore on startup (default: enabled)                                                         | 1                      |
+| RUN_MODE          | No   | Running mode                                                               | 1-Standalone (default), 2-Web      |
+| WEB_PORT          | No   | Web server port                                                            | Default: 8088               |
+| WEB_PATH           | No   | Web request prefix for reverse proxy configuration (default: empty)        | /backup2gh             |
+| WEB_PWD           | No   | Web interface password (default: admin:1234)                               | 1234                   |
+| BAK_APP_NAME      | Yes  | Name of the application to back up (used for distinguishing different apps) | uptime                 |
+| BAK_DATA_DIR      | Yes     | Directory of the application data to back up                               | /app/data              |
+| BAK_GITHUB_TOKEN  | Yes     | Personal Access Token (`PAT`) for GitHub backup                              |                        |
+| BAK_REPO          | Yes     | 	Backup repository name                                                                     | xxx_repo               |
+| BAK_REPO_OWNER    | Yes     | Owner of the backup repository                                                                   | xxx                    |
+| BAK_PROXY         | No   | Proxy for backup (not needed if there's no network issue)                                                           | http://localhost:10808 |
+| BAK_CRON          | No   | Cron schedule for backups (default: 0 0 0/1 * * ?)                                                 |                        |
+| BAK_MAX_COUNT     | No   | Maximum number of backup files to keep in the repository (default: 5)                                                       | 5                      |
+| BAK_LOG           | No   | Enable logging (for debugging)                                                                  | 1                      |
+| BAK_BRANCH        | No   | Delay restore after container startup (in minutes)                                                           | main                   |
+| BAK_DELAY_RESTORE | No   | Pull the latest backup and restore on startup (default: enabled)                                                 | 1                      |
+| START_WITH_RESTORE | No   | Pull the latest backup and restore on startup (default: enabled)                                                         | 1                      |
+| EXEC_SQL_CRON | No    | Scheduled SQL Tasks (SQLite Only)     | 0 0 2 1 * ?                                                                 |
+| EXEC_SQL | No    | Execute SQL                     | DELETE FROM service_histories WHERE created_at < datetime('now', '-7 days') |
+| SQLITE_PATH | No    | SQLite Database File Path              | /app/data/sqlite.db                                                         |
 ### Usage
 1. Standalone
 Create a config.yaml file in the same directory as backup2gh, with keys matching the environment variable names in lowercase:

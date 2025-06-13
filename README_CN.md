@@ -7,24 +7,27 @@
 4. 容器重启时还原最近一次数据备份。
 5. 仓库不存在时自动创建备份仓库（私有），备份仓库自带`GitHub Action`，定时清理提交历史，避免占用仓库空间
 ### 环境变量
-| 变量名               | 是否必填 | 说明                         | 示例                     |
-|-------------------|------|----------------------------|------------------------|
-| RUN_MODE          | 否    | 运行模式                       | 1-独立运行(默认), 2-web      |
-| WEB_PORT          | 否    | web端口                      | 默认8088                 |
-| WEB_PATH           | 否    | web请求前缀，用于反代路径配置,默认空       | /backup2gh             |
-| WEB_PWD           | 否    | web密码，默认账号：admin, 密码：1234  | 1234                   |
-| BAK_APP_NAME      | 是    | 备份应用名称，用于区分不同应用的备份数据       | uptime                 |
-| BAK_DATA_DIR      | 是    | 计划备份的应用程序数据目录              | /app/data              |
-| BAK_GITHUB_TOKEN  | 是    | 备份github账号的`PAT`           |                        |
-| BAK_REPO          | 是    | 备份仓库名称                     | xxx_repo               |
-| BAK_REPO_OWNER    | 是    | 备份仓库拥有者                    | xxx                    |
-| BAK_PROXY         | 否    | 备份代理，无网络问题无需设置此项           | http://localhost:10808 |
-| BAK_CRON          | 否    | 定时备份数据，默认值：  0 0 0/1 * * ? |                        |
-| BAK_MAX_COUNT     | 否    | 备份文件在仓库中保留的最大数量，默认：5       | 5                      |
-| BAK_LOG           | 否    | 开启日志，用于调试                  | 1                      |
-| BAK_BRANCH        | 否    | 备份仓库对应分支，默认：main           | main                   |
-| BAK_DELAY_RESTORE | 否    | 还原延迟，容器启动后延迟还原data, 单位是分钟  | 1                      |
-| START_WITH_RESTORE | 否    | 启动时拉取最新备份还原，默认开启           | 1                      |
+| 变量名               | 是否必填 | 说明                         | 示例                                                                          |
+|-------------------|------|----------------------------|-----------------------------------------------------------------------------|
+| RUN_MODE          | 否    | 运行模式                       | 1-独立运行(默认), 2-web                                                           |
+| WEB_PORT          | 否    | web端口                      | 默认8088                                                                      |
+| WEB_PATH           | 否    | web请求前缀，用于反代路径配置,默认空       | /backup2gh                                                                  |
+| WEB_PWD           | 否    | web密码，默认账号：admin, 密码：1234  | 1234                                                                        |
+| BAK_APP_NAME      | 是    | 备份应用名称，用于区分不同应用的备份数据       | uptime                                                                      |
+| BAK_DATA_DIR      | 是    | 计划备份的应用程序数据目录              | /app/data                                                                   |
+| BAK_GITHUB_TOKEN  | 是    | 备份github账号的`PAT`           |                                                                             |
+| BAK_REPO          | 是    | 备份仓库名称                     | xxx_repo                                                                    |
+| BAK_REPO_OWNER    | 是    | 备份仓库拥有者                    | xxx                                                                         |
+| BAK_PROXY         | 否    | 备份代理，无网络问题无需设置此项           | http://localhost:10808                                                      |
+| BAK_CRON          | 否    | 定时备份数据，默认值：  0 0 0/1 * * ? |                                                                             |
+| BAK_MAX_COUNT     | 否    | 备份文件在仓库中保留的最大数量，默认：5       | 5                                                                           |
+| BAK_LOG           | 否    | 开启日志，用于调试                  | 1                                                                           |
+| BAK_BRANCH        | 否    | 备份仓库对应分支，默认：main           | main                                                                        |
+| BAK_DELAY_RESTORE | 否    | 还原延迟，容器启动后延迟还原data, 单位是分钟  | 1                                                                           |
+| START_WITH_RESTORE | 否    | 启动时拉取最新备份还原，默认开启           | 1                                                                           |
+| EXEC_SQL_CRON | 否    | 定时执行SQL任务（仅支持sqlite）       | 0 0 2 1 * ?                                                                 |
+| EXEC_SQL | 否    | 执行sql                      | DELETE FROM service_histories WHERE created_at < datetime('now', '-7 days') |
+| SQLITE_PATH | 否    | sqlite数据库文件路径              | /app/data/sqlite.db                                                         |
 ### 使用
 1. 单独部署：新建`config.yaml`配置文件, 并置于`backup2gh`同级目录，**属性配置对应环境变量的小写KEY**
 ```

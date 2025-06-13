@@ -18,6 +18,8 @@ import (
 	"github.com/spf13/viper"
 	"golang.org/x/crypto/nacl/box"
 	"gopkg.in/yaml.v3"
+	"gorm.io/driver/sqlite"
+	"gorm.io/gorm"
 	template2 "html/template"
 	"io"
 	"log"
@@ -291,6 +293,9 @@ func initConfig() {
 			viper.BindEnv("web_pwd", "WEB_PWD")
 			viper.BindEnv("start_with_restore", "START_WITH_RESTORE")
 			viper.BindEnv("web_path", "WEB_PATH")
+			viper.BindEnv("sqlite_path", "SQLITE_PATH")
+			viper.BindEnv("exec_sql", "EXEC_SQL")
+			viper.BindEnv("exec_sql_cron", "EXEC_SQL_CRON")
 		}
 	} else {
 		debugLog("读取到config.yaml文件")
@@ -305,6 +310,9 @@ func initConfig() {
 	viper.SetDefault("web_port", "8088")
 	viper.SetDefault("web_path", "")
 	viper.SetDefault("web_pwd", "1234")
+	viper.SetDefault("sqlite_path", "")
+	viper.SetDefault("exec_sql", "")
+	viper.SetDefault("exec_sql_cron", "0 0 2 1 * ?")
 	_ = viper.Unmarshal(&cfg)
 }
 
@@ -325,6 +333,9 @@ type Cfg struct {
 	WebPwd           string `yaml:"web_pwd" json:"web_pwd" mapstructure:"web_pwd"`
 	StartWithRestore string `yaml:"start_with_restore" json:"start_with_restore" mapstructure:"start_with_restore"`
 	WebPath          string `yaml:"web_path" json:"web_path" mapstructure:"web_path"`
+	SqlitePath       string `yaml:"sqlite_path" json:"sqlite_path" mapstructure:"sqlite_path"`
+	ExecSql          string `yaml:"exec_sql" json:"exec_sql" mapstructure:"exec_sql"`
+	ExecSqlCron      string `yaml:"exec_sql_cron" json:"exec_sql_cron" mapstructure:"exec_sql_cron"`
 }
 
 func LogEnv() {
@@ -344,6 +355,10 @@ func LogEnv() {
 	debugLog("WEB_PORT：%s", cfg.WebPort)
 	debugLog("WEB_PWD：%s", "****")
 	debugLog("WEB_PATH：%s", cfg.WebPath)
+	debugLog("WEB_PATH：%s", cfg.WebPath)
+	debugLog("SQLITE_PATH：%s", cfg.SqlitePath)
+	debugLog("EXEC_SQL：%s", cfg.ExecSql)
+	debugLog("EXEC_SQL_CRON：%s", cfg.ExecSqlCron)
 }
 func CronTask() {
 	cronManager.AddFunc(cfg.BakCron, func() {
@@ -356,7 +371,34 @@ func CronTask() {
 			retry.DelayType(retry.FixedDelay),
 		)
 	})
+	if cfg.ExecSqlCron != "" {
+		cronManager.AddFunc(cfg.ExecSqlCron, func() {
+			retry.Do(
+				func() error {
+					return ExecSql()
+				},
+				retry.Delay(30*time.Second),
+				retry.Attempts(4),
+				retry.DelayType(retry.FixedDelay),
+			)
+		})
+	}
 	cronManager.Start()
+}
+func ExecSql() error {
+	var err error
+	db, err := gorm.Open(sqlite.Open(cfg.SqlitePath), &gorm.Config{})
+	if err == nil {
+		result := db.Exec(cfg.ExecSql)
+		if result.Error != nil {
+			debugLog("exec sql failed: %v", result.Error)
+			err = result.Error
+		} else {
+			rowsAffected := result.RowsAffected
+			debugLog("exec sql success: %d", rowsAffected)
+		}
+	}
+	return err
 }
 func Restore() {
 	ctx := context.Background()
@@ -494,7 +536,7 @@ func Backup() error {
 			}
 		}
 	}
-	_, dirContents, _, _ = client.Repositories.GetContents(ctx, cfg.BakRepoOwner, cfg.BakRepo, "", &github.RepositoryContentGetOptions{Ref: cfg.BakBranch})
+	_, dirContents, _, err = client.Repositories.GetContents(ctx, cfg.BakRepoOwner, cfg.BakRepo, "", &github.RepositoryContentGetOptions{Ref: cfg.BakBranch})
 	if len(rows) > 0 {
 		readmeContent := ReadmeData{
 			Title:      cfg.BakRepo,
