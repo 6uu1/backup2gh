@@ -197,7 +197,7 @@ func main() {
 func initLogFile() {
 	if cfg.BakLog == "1" {
 		var err error
-		logFile, err = os.OpenFile("debug.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+		logFile, err = os.OpenFile("/tmp/debug.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 		if err != nil {
 			log.Fatalf("无法打开日志文件: %v", err)
 		}
@@ -401,7 +401,7 @@ func ExecSql() error {
 	return err
 }
 func Restore() {
-	lockFile := "restore.lock"
+	lockFile := "/tmp/restore.lock"
 	if _, err := os.Stat(lockFile); err == nil {
 		debugLog("Restore operation is already in progress by another process, skipping")
 		return
