@@ -401,11 +401,37 @@ func ExecSql() error {
 	return err
 }
 func Restore() {
+	lockFile := "restore.lock"
+	if _, err := os.Stat(lockFile); err == nil {
+		debugLog("Restore operation is already in progress by another process, skipping")
+		return
+	}
+
+	// Create lock file
+	if err := os.WriteFile(lockFile, []byte("locked"), 0644); err != nil {
+		debugLog("Failed to create lock file: %v", err)
+		return
+	}
+	defer func() {
+		if err := os.Remove(lockFile); err != nil {
+			debugLog("Failed to delete lock file: %v", err)
+		}
+	}()
+
 	ctx := context.Background()
-	client, _ := getClient()
-	_, dirContents, _, _ := client.Repositories.GetContents(ctx, cfg.BakRepoOwner, cfg.BakRepo, cfg.AppName, nil)
+	client, err := getClient()
+	if err != nil {
+		debugLog("Failed to get client: %v", err)
+		return
+	}
+
+	_, dirContents, _, err := client.Repositories.GetContents(ctx, cfg.BakRepoOwner, cfg.BakRepo, cfg.AppName, nil)
+	if err != nil {
+		debugLog("Failed to fetch repository contents: %v", err)
+		return
+	}
+
 	if len(dirContents) > 0 {
-		//取最后一个文件
 		content := dirContents[len(dirContents)-1]
 		RestoreFromContent(content)
 	}
