@@ -9,8 +9,39 @@ permissions:
   packages: write
 
 jobs:
-  releases-matrix:
-    name: Release Go Binary
+  create-release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    outputs:
+      tag_name: ${{ steps.get_tag.outputs.new_tag }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Fetch all history for all tags
+      - name: Get latest tag
+        id: get_tag
+        run: |
+          git fetch --tags
+          # Get the latest tag that is a valid semantic version, e.g., v1.2.3
+          latest_tag=$(git tag --sort=-v:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -n1)
+          if [ -z "$latest_tag" ]; then
+            new_tag="v1.0.0"
+          else
+            version_string=${latest_tag#v}
+            IFS='.' read -r major minor patch <<< "$version_string"
+            patch=$((patch+1))
+            new_tag="v${major}.${minor}.${patch}"
+          fi
+          echo "new_tag=$new_tag" >> $GITHUB_OUTPUT
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.get_tag.outputs.new_tag }}
+          generate_release_notes: true
+
+  build-and-upload:
+    name: Build and Upload
+    needs: create-release
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -25,34 +56,6 @@ jobs:
             goos: darwin
     steps:
       - uses: actions/checkout@v4
-      - name: Get latest tag
-        id: get_tag
-        run: |
-          git fetch --tags
-          latest_tag=$(git tag --sort=-v:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -n1)
-          echo "latest_tag=$latest_tag" >> $GITHUB_OUTPUT
-      - name: Bump version and create tag
-        id: bump_tag
-        run: |
-          if [ -z "${{ steps.get_tag.outputs.latest_tag }}" ]; then
-            new_tag="v1.0.0"
-          else
-            IFS='.' read -r major minor patch <<< "${{ steps.get_tag.outputs.latest_tag }}"
-            patch=$((patch+1))
-            new_tag="v${major}.${minor}.${patch}"
-          fi
-          git config user.name "github-actions"
-          git config user.email "github-actions@github.com"
-          git tag "$new_tag"
-          git push origin "$new_tag"
-          echo "new_tag=$new_tag" >> $GITHUB_OUTPUT
-      - name: Create Release
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: ${{ steps.bump_tag.outputs.new_tag }}
-          name: "Auto Release ${{ steps.bump_tag.outputs.new_tag }}"
-          draft: false
-          prerelease: false
       - uses: wangyoucao577/go-release-action@v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -61,4 +64,6 @@ jobs:
           goversion: "https://go.dev/dl/go1.23.1.linux-amd64.tar.gz"
           binary_name: "backup2gh"
           asset_name: "backup2gh-${{ matrix.goos }}-${{ matrix.goarch }}"
+          release_tag: ${{ needs.create-release.outputs.tag_name }}
+          overwrite: true
           md5sum: false
