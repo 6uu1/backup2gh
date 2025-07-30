@@ -1,6 +1,7 @@
 on:
   release:
     types: [created]
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -9,7 +10,6 @@ permissions:
 jobs:
   releases-matrix:
     name: Release Go Binary
-  workflow_dispatch:
     runs-on: ubuntu-latest
     strategy:
       matrix:
