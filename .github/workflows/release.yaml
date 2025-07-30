@@ -9,6 +9,7 @@ permissions:
 jobs:
   releases-matrix:
     name: Release Go Binary
+  workflow_dispatch:
     runs-on: ubuntu-latest
     strategy:
       matrix:
